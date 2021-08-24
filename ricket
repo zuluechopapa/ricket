@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+$base=845265;        # all these should be changed at a minimum.
+$addition=96382021;
+$modulo=1125899906842623;   #I suggest (2^some large number)-1 
+$passes=15;                 #number of times to run md5sum.
+
+#pstrings are tne various char possibilities used to build up your password.
+#you should change the ordering and contents
+@pstring=(
+     "abcdefghijklmnoPQRSTUVWXYZ",
+     "01332569740812456789",
+     "#*(-",
+     "abcdehjkmnopQRTWYBFHlMNOpqrstuvwXYZ"
+   );
+
+$rando=$ARGV[0];
+$plen=$ARGV[1];
+
+if ($rando=~/[A-z]/){     #randomize up a little more, md5sum on
+  while ( $passes > 0 ){  #strings and resultant strings
+     $rando=`echo "$rando" 2>&1 | md5sum | sed -e "s/ .*//" `;
+     $passes--;
+  }
+  #remove all the alpha chars, get just a decent sized number
+  $rando=`echo $rando 2>&1 | md5sum | sed -e "s/[a-Z]//g" -e "s/ .*//"`;
+}
+
+foreach $arg (@ARGV){
+   $ARGC++;
+}
+if ($ARGC!=2){
+   print "usage:\n";
+   print "   ricket [random base characters] [number of chars for passwd]\n";
+   exit 0;
+}
+
+$count=0;    #counting up all the chars in the strings
+foreach $ctr (@pstring){
+  $psl[$count]=length($pstring[$count]);
+  $count++;
+}
+
+randu();
+
+print "passwd: ";
+$pl=0;
+while($pl<$plen){
+  randu();
+  if($pl>=$count){
+    $sl=int($rando*$count);
+    randu();
+  }else{
+    $sl=$pl;
+  }
+  $str=$pstring[$sl];
+  $lgt=length($str);
+  $ss=int($rando*$lgt);
+  $c=substr($str,$ss,1);
+  substr($str,$ss,1,'');
+  $pstring[$sl]=$str;
+  print "$c";
+  randu();
+  $pl++;
+}
+print "\n";
+
+
+sub randu(){
+  $rando=($base*$rando+$addition)%$modulo;
+  $rando=$rando%10000;
+  $rando=$rando/10000;
+}
+
